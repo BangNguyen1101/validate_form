@@ -1,92 +1,103 @@
-import React from "react";
-import { FlatList, StyleSheet, SafeAreaView, View, Text } from "react-native";
-import { Ionicons } from "react-native-vector-icons"; // Thư viện icon (nếu cần)
+import React, { useState } from 'react';
+import { Text, StyleSheet, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 
-// Dữ liệu mẫu cho danh sách thông báo
-const notifications = [
-  { id: "1", icon: "checkmark-circle", title: "Bước 1: Xác định nhu cầu", description: "Vũ Văn Hoàng sắp đến hạn lúc 01/08/2020 9:00", date: "20/08/2020, 06:00" },
-  { id: "2", icon: "people", title: "Bạn có khách hàng mới!", description: "Chúc mừng bạn, bạn có khách hàng mới. Hãy mau chóng liên lạc ngay.", date: "20/08/2020, 06:00" },
-  { id: "3", icon: "people", title: "Khách hàng được chia sẻ bị trùng", description: "Rất tiếc, khách hàng được chia sẻ đã tồn tại trên hệ thống.", date: "20/08/2020, 06:00" },
-  { id: "4", icon: "checkmark-circle", title: "Công việc sắp đến hạn hôm nay", description: "Bạn có 17 công việc sắp đến hạn trong hôm nay.", date: "20/08/2020, 06:00" },
-];
+const LoginScreen = () => {
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [error, setError] = useState('');
 
-// Component từng thông báo
-const NotificationItem = ({ icon, title, description, date }) => {
+  const validatePhoneNumber = (number) => {
+    const phoneRegex = /^(\+84|0)(3[2-9]|5[2689]|7[06-9]|8[1-9]|9[0-9])[0-9]{7}$/;
+    return phoneRegex.test(number);
+  };
+
+  const onContinuePress = () => {
+    if (!validatePhoneNumber(phoneNumber)) {
+      setError('Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam!');
+      return;
+    }
+    setError('');
+    Alert.alert('Thông báo', `Số điện thoại bạn nhập: ${phoneNumber}`);
+  };
+
   return (
-    <View style={styles.itemContainer}>
-      <Ionicons name={icon} size={24} color="#007AFF" style={styles.icon} />
-      <View style={styles.textContainer}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.description}>{description}</Text>
-        <Text style={styles.date}>{date}</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>Đăng nhập</Text>
+
+        <Text style={styles.description}>
+          Dùng số điện thoại để đăng nhập hoặc đăng ký tài khoản tại OneHousing Pro
+        </Text>
+
+        <TextInput
+          style={[styles.input, error ? styles.inputError : null]}
+          placeholder="Nhập số điện thoại của bạn"
+          placeholderTextColor="#ccc"
+          keyboardType="phone-pad"
+          value={phoneNumber}
+          onChangeText={(text) => {
+            setPhoneNumber(text);
+            setError('');
+          }}
+        />
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        <TouchableOpacity style={styles.button} onPress={onContinuePress}>
+          <Text style={styles.buttonText}>Tiếp tục</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
-// Màn hình danh sách thông báo
-const NotificationsScreen = () => {
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <FlatList
-        data={notifications}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <NotificationItem
-            icon={item.icon}
-            title={item.title}
-            description={item.description}
-            date={item.date}
-          />
-        )}
-        contentContainerStyle={styles.listContent} // Khoảng cách phía trên danh sách
-        ItemSeparatorComponent={() => <View style={styles.separator} />} // Khoảng cách giữa các item
-      />
-    </SafeAreaView>
-  );
-};
-
-// Style của ứng dụng
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
-    backgroundColor: "#fff",
-  },
-  listContent: {
-    paddingTop: 20, // Khoảng cách phía trên danh sách
-  },
-  itemContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    padding: 10,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-    marginHorizontal: 10,
-  },
-  icon: {
-    marginRight: 10,
-  },
-  textContainer: {
-    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
+    backgroundColor: '#fff',
   },
   title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 5,
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
   description: {
     fontSize: 14,
-    color: "#666",
-    marginBottom: 5,
+    color: '#666',
+    marginBottom: 24,
   },
-  date: {
+  input: {
+    height: 48,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+    fontSize: 14,
+  },
+  inputError: {
+    borderColor: 'red',
+  },
+  errorText: {
+    color: 'red',
     fontSize: 12,
-    color: "#999",
+    marginBottom: 16,
   },
-  separator: {
-    height: 10, // Khoảng cách giữa các item
+  button: {
+    height: 48,
+    backgroundColor: '#007AFF',
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
-export default NotificationsScreen;
+export default LoginScreen;
